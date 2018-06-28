@@ -69,19 +69,19 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
 
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
@@ -89,10 +89,10 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
 
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
    // for(unsigned int block_k=0 ; block_k< K ; block_k+=16)
 	//{
@@ -105,7 +105,7 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
         plB[48] = B[48+0*ldb];
         plB[64] = B[64+0*ldb];
         plB[80] = B[80+0*ldb];
-	   
+
 	    plA[0] = A[0+0*lda];
         plA[16] = A[16+0*lda];
         plA[32] = A[32+0*lda];
@@ -113,7 +113,7 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
         plA[64] = A[64+0*lda];
         plA[80] = A[80+0*lda];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -147,7 +147,7 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
     C+= gidx*96+idx;
     C+= gidy*96*ldc;
     C+= idy*ldc;
-    
+
 	C[0*ldc] = alpha*rC[0][0] + beta*C[0*ldc];
     C[16*ldc] = alpha*rC[0][1] + beta*C[16*ldc];
     C[32*ldc] = alpha*rC[0][2] + beta*C[32*ldc];
@@ -189,7 +189,7 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
     C[48*ldc] = alpha*rC[5][3] + beta*C[48*ldc];
     C[64*ldc] = alpha*rC[5][4] + beta*C[64*ldc];
     C[80*ldc] = alpha*rC[5][5] + beta*C[80*ldc];
-   
+
 }
 
 
@@ -209,32 +209,32 @@ __kernel void sgemm_NT_1_96_16_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float co
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 
 	int CurrentOffSetA = gidx*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -246,7 +246,7 @@ __kernel void sgemm_NT_1_96_16_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float co
         plB[48] = B[48+0*ldb];
         plB[64] = B[64+0*ldb];
         plB[80] = B[80+0*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -254,7 +254,7 @@ __kernel void sgemm_NT_1_96_16_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float co
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -289,9 +289,9 @@ __kernel void sgemm_NT_1_96_16_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float co
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -328,31 +328,31 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetB = gidy*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -364,7 +364,7 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80];
-	   
+
 	      plA[0]  = A[0];
         plA[16] = A[16];
         plA[32] = A[32];
@@ -372,7 +372,7 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
         plA[64] = A[64];
         plA[80] = A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -407,9 +407,9 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
       return;
 
   C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-  do 
+  do
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
 	  if(offset_y+16<N)
@@ -422,9 +422,9 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
         C[64*ldc] = mad(alpha, rC[i][4], beta*C[64*ldc]);
 	  if(offset_y+80<N)
         C[80*ldc] = mad(alpha, rC[i][5], beta*C[80*ldc]);
-      
+
 	  C+=16;
-	    
+
 	}
     while (++i < 6);
 }
@@ -445,32 +445,32 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetA = gidx*96+ idx;
 	int CurrentOffSetB = gidy*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -482,7 +482,7 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -490,7 +490,7 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -525,9 +525,9 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -541,13 +541,13 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
         C[64*ldc] = mad(alpha, rC[i][4], beta*C[64*ldc]);
 	  if(offset_y+80<N)
         C[80*ldc] = mad(alpha, rC[i][5], beta*C[80*ldc]);
-      
+
 	  C+=16;
 	  offset_x+=16;
 	  if(offset_x>=M )
         return;
 
-	    
+
 	}
     while (++i < 6);
 }
@@ -622,19 +622,19 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
 
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
@@ -642,10 +642,10 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
 
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
    // for(unsigned int block_k=0 ; block_k< K ; block_k+=16)
 	//{
@@ -658,7 +658,7 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
         plB[48] = B[48+0*ldb];
         plB[64] = B[64+0*ldb];
         plB[80] = B[80+0*ldb];
-	   
+
 	    plA[0] = A[0+0*lda];
         plA[16] = A[16+0*lda];
         plA[32] = A[32+0*lda];
@@ -666,7 +666,7 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
         plA[64] = A[64+0*lda];
         plA[80] = A[80+0*lda];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -700,49 +700,49 @@ __kernel void sgemm_NT_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
     C+= gidx*96+idx;
     C+= gidy*96*ldc;
     C+= idy*ldc;
-    
+
 	C[0*ldc] = alpha*rC[0][0]  ;
     C[16*ldc] = alpha*rC[0][1] ;
     C[32*ldc] = alpha*rC[0][2] ;
     C[48*ldc] = alpha*rC[0][3] ;
     C[64*ldc] = alpha*rC[0][4] ;
     C[80*ldc] = alpha*rC[0][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[1][0]  ;
     C[16*ldc] = alpha*rC[1][1] ;
     C[32*ldc] = alpha*rC[1][2] ;
     C[48*ldc] = alpha*rC[1][3] ;
     C[64*ldc] = alpha*rC[1][4] ;
     C[80*ldc] = alpha*rC[1][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[2][0]  ;
     C[16*ldc] = alpha*rC[2][1] ;
     C[32*ldc] = alpha*rC[2][2] ;
     C[48*ldc] = alpha*rC[2][3] ;
     C[64*ldc] = alpha*rC[2][4] ;
     C[80*ldc] = alpha*rC[2][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[3][0]  ;
     C[16*ldc] = alpha*rC[3][1] ;
     C[32*ldc] = alpha*rC[3][2] ;
     C[48*ldc] = alpha*rC[3][3] ;
     C[64*ldc] = alpha*rC[3][4] ;
     C[80*ldc] = alpha*rC[3][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[4][0]  ;
     C[16*ldc] = alpha*rC[4][1] ;
     C[32*ldc] = alpha*rC[4][2] ;
     C[48*ldc] = alpha*rC[4][3] ;
     C[64*ldc] = alpha*rC[4][4] ;
     C[80*ldc] = alpha*rC[4][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[5][0]  ;
     C[16*ldc] = alpha*rC[5][1] ;
     C[32*ldc] = alpha*rC[5][2] ;
     C[48*ldc] = alpha*rC[5][3] ;
     C[64*ldc] = alpha*rC[5][4] ;
     C[80*ldc] = alpha*rC[5][5] ;
-   
+
 }
 
 
@@ -761,32 +761,32 @@ __kernel void sgemm_NT_1_96_16_16x16_6x6__ALPHA_SPLIT_ROW( __global float const 
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 
 	int CurrentOffSetA = gidx*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -798,7 +798,7 @@ __kernel void sgemm_NT_1_96_16_16x16_6x6__ALPHA_SPLIT_ROW( __global float const 
         plB[48] = B[48+0*ldb];
         plB[64] = B[64+0*ldb];
         plB[80] = B[80+0*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -806,7 +806,7 @@ __kernel void sgemm_NT_1_96_16_16x16_6x6__ALPHA_SPLIT_ROW( __global float const 
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -841,9 +841,9 @@ __kernel void sgemm_NT_1_96_16_16x16_6x6__ALPHA_SPLIT_ROW( __global float const 
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0];
@@ -879,31 +879,31 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetB = gidy*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -915,7 +915,7 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80];
-	   
+
 	    plA[0]  = A[0];
         plA[16] = A[16];
         plA[32] = A[32];
@@ -923,7 +923,7 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
         plA[64] = A[64];
         plA[80] = A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -958,9 +958,9 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0];
@@ -974,9 +974,9 @@ __kernel void sgemm_NT_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
         C[64*ldc] = alpha * rC[i][4];
 	  if(offset_y+80<N)
         C[80*ldc] = alpha * rC[i][5];
-      
+
 	  C+=16;
-	    
+
 	}
     while (++i < 6);
 }
@@ -996,32 +996,32 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float cons
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetA = gidx*96+ idx;
 	int CurrentOffSetB = gidy*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -1033,7 +1033,7 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float cons
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -1041,7 +1041,7 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float cons
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -1076,9 +1076,9 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float cons
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0];
@@ -1092,12 +1092,12 @@ __kernel void sgemm_NT_1_1_16_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float cons
         C[64*ldc] = alpha * rC[i][4];
 	  if(offset_y+80<N)
         C[80*ldc] = alpha * rC[i][5];
-      
+
 	  C+=16;
 	  offset_x+=16;
 	  if(offset_x>=M )
         return;
-	    
+
 	}
     while (++i < 6);
 }
@@ -1137,19 +1137,19 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
 
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
@@ -1157,10 +1157,10 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
 
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -1171,7 +1171,7 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
         plB[48] = B[48+0*ldb];
         plB[64] = B[64+0*ldb];
         plB[80] = B[80+0*ldb];
-	   
+
 	    plA[0] = A[0+0*lda];
         plA[16] = A[16+0*lda];
         plA[32] = A[32+0*lda];
@@ -1179,7 +1179,7 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
         plA[64] = A[64+0*lda];
         plA[80] = A[80+0*lda];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -1188,56 +1188,56 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -1253,7 +1253,7 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
     C+= gidx*96+idx;
     C+= gidy*96*ldc;
     C+= idy*ldc;
-    
+
 	C[0*ldc] = alpha*rC[0][0] + beta*C[0*ldc];
     C[16*ldc] = alpha*rC[0][1] + beta*C[16*ldc];
     C[32*ldc] = alpha*rC[0][2] + beta*C[32*ldc];
@@ -1295,7 +1295,7 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
     C[48*ldc] = alpha*rC[5][3] + beta*C[48*ldc];
     C[64*ldc] = alpha*rC[5][4] + beta*C[64*ldc];
     C[80*ldc] = alpha*rC[5][5] + beta*C[80*ldc];
-   
+
 }
 
 
@@ -1315,32 +1315,32 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 
 	int CurrentOffSetA = gidx*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;//= K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -1351,7 +1351,7 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
         plB[48] = B[48+0*ldb];
         plB[64] = B[64+0*ldb];
         plB[80] = B[80+0*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -1359,7 +1359,7 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -1368,56 +1368,56 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -1436,9 +1436,9 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -1475,31 +1475,31 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetB = gidy*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;//K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -1510,7 +1510,7 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80];
-	   
+
 	    plA[0]  = A[0];
         plA[16] = A[16];
         plA[32] = A[32];
@@ -1518,7 +1518,7 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
         plA[64] = A[64];
         plA[80] = A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -1528,56 +1528,56 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -1595,9 +1595,9 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -1611,9 +1611,9 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
         C[64*ldc] = mad(alpha, rC[i][4], beta*C[64*ldc]);
 	  if(offset_y+80<N)
         C[80*ldc] = mad(alpha, rC[i][5], beta*C[80*ldc]);
-      
+
 	  C+=16;
-	    
+
 	}
     while (++i < 6);
 }
@@ -1634,32 +1634,32 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetA = gidx*96+ idx;
 	int CurrentOffSetB = gidy*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;//K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -1670,7 +1670,7 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -1678,7 +1678,7 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -1688,56 +1688,56 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -1756,9 +1756,9 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -1772,13 +1772,13 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
         C[64*ldc] = mad(alpha, rC[i][4], beta*C[64*ldc]);
 	  if(offset_y+80<N)
         C[80*ldc] = mad(alpha, rC[i][5], beta*C[80*ldc]);
-      
+
 	  C+=16;
 	  offset_x+=16;
 	  if(offset_x>=M )
         return;
 
-	    
+
 	}
     while (++i < 6);
 }
@@ -1853,19 +1853,19 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
 
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
@@ -1873,10 +1873,10 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
 
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k =0;// K >> 4;
-    do 
+    do
 	{
    // for(unsigned int block_k=0 ; block_k< K ; block_k+=16)
 	//{
@@ -1889,7 +1889,7 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
         plB[48] = B[48+0*ldb];
         plB[64] = B[64+0*ldb];
         plB[80] = B[80+0*ldb];
-	   
+
 	    plA[0] = A[0+0*lda];
         plA[16] = A[16+0*lda];
         plA[32] = A[32+0*lda];
@@ -1897,7 +1897,7 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
         plA[64] = A[64+0*lda];
         plA[80] = A[80+0*lda];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -1906,56 +1906,56 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -1968,49 +1968,49 @@ __kernel void sgemm_NT_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
     C+= gidx*96+idx;
     C+= gidy*96*ldc;
     C+= idy*ldc;
-    
+
 	C[0*ldc] = alpha*rC[0][0]  ;
     C[16*ldc] = alpha*rC[0][1] ;
     C[32*ldc] = alpha*rC[0][2] ;
     C[48*ldc] = alpha*rC[0][3] ;
     C[64*ldc] = alpha*rC[0][4] ;
     C[80*ldc] = alpha*rC[0][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[1][0]  ;
     C[16*ldc] = alpha*rC[1][1] ;
     C[32*ldc] = alpha*rC[1][2] ;
     C[48*ldc] = alpha*rC[1][3] ;
     C[64*ldc] = alpha*rC[1][4] ;
     C[80*ldc] = alpha*rC[1][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[2][0]  ;
     C[16*ldc] = alpha*rC[2][1] ;
     C[32*ldc] = alpha*rC[2][2] ;
     C[48*ldc] = alpha*rC[2][3] ;
     C[64*ldc] = alpha*rC[2][4] ;
     C[80*ldc] = alpha*rC[2][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[3][0]  ;
     C[16*ldc] = alpha*rC[3][1] ;
     C[32*ldc] = alpha*rC[3][2] ;
     C[48*ldc] = alpha*rC[3][3] ;
     C[64*ldc] = alpha*rC[3][4] ;
     C[80*ldc] = alpha*rC[3][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[4][0]  ;
     C[16*ldc] = alpha*rC[4][1] ;
     C[32*ldc] = alpha*rC[4][2] ;
     C[48*ldc] = alpha*rC[4][3] ;
     C[64*ldc] = alpha*rC[4][4] ;
     C[80*ldc] = alpha*rC[4][5] ;
-    C+=16;					   
+    C+=16;
     C[0*ldc] = alpha*rC[5][0]  ;
     C[16*ldc] = alpha*rC[5][1] ;
     C[32*ldc] = alpha*rC[5][2] ;
     C[48*ldc] = alpha*rC[5][3] ;
     C[64*ldc] = alpha*rC[5][4] ;
     C[80*ldc] = alpha*rC[5][5] ;
-   
+
 }
 
 
@@ -2029,32 +2029,32 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 
 	int CurrentOffSetA = gidx*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;//K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -2065,7 +2065,7 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
         plB[48] = B[48+0*ldb];
         plB[64] = B[64+0*ldb];
         plB[80] = B[80+0*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -2073,7 +2073,7 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -2083,56 +2083,56 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -2152,9 +2152,9 @@ __kernel void sgemm_NT_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0];
@@ -2190,31 +2190,31 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetB = gidy*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;//K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -2225,7 +2225,7 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80];
-	   
+
 	    plA[0]  = A[0];
         plA[16] = A[16];
         plA[32] = A[32];
@@ -2233,7 +2233,7 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
         plA[64] = A[64];
         plA[80] = A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -2243,56 +2243,56 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -2310,9 +2310,9 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0];
@@ -2326,9 +2326,9 @@ __kernel void sgemm_NT_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
         C[64*ldc] = alpha * rC[i][4];
 	  if(offset_y+80<N)
         C[80*ldc] = alpha * rC[i][5];
-      
+
 	  C+=16;
-	    
+
 	}
     while (++i < 6);
 }
@@ -2348,32 +2348,32 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetA = gidx*96+ idx;
 	int CurrentOffSetB = gidy*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;// K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idy*97+idx;
@@ -2384,7 +2384,7 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -2392,7 +2392,7 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -2402,56 +2402,56 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -2469,9 +2469,9 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0];
@@ -2485,12 +2485,12 @@ __kernel void sgemm_NT_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
         C[64*ldc] = alpha * rC[i][4];
 	  if(offset_y+80<N)
         C[80*ldc] = alpha * rC[i][5];
-      
+
 	  C+=16;
 	  offset_x+=16;
 	  if(offset_x>=M )
         return;
-	    
+
 	}
     while (++i < 6);
 }
@@ -2570,19 +2570,19 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
 
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
@@ -2590,10 +2590,10 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
 
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -2604,7 +2604,7 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
         plB[48] = B[48*ldb];
         plB[64] = B[64*ldb];
         plB[80] = B[80*ldb];
-	   
+
 	      plA[0] = A[0+0*lda];
         plA[16] = A[16+0*lda];
         plA[32] = A[32+0*lda];
@@ -2612,7 +2612,7 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
         plA[64] = A[64+0*lda];
         plA[80] = A[80+0*lda];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -2642,7 +2642,7 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
     C+= gidx*96+idx;
     C+= gidy*96*ldc;
     C+= idy*ldc;
-    
+
 	C[0*ldc] = alpha*rC[0][0] + beta*C[0*ldc];
     C[16*ldc] = alpha*rC[0][1] + beta*C[16*ldc];
     C[32*ldc] = alpha*rC[0][2] + beta*C[32*ldc];
@@ -2684,7 +2684,7 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float 
     C[48*ldc] = alpha*rC[5][3] + beta*C[48*ldc];
     C[64*ldc] = alpha*rC[5][4] + beta*C[64*ldc];
     C[80*ldc] = alpha*rC[5][5] + beta*C[80*ldc];
-   
+
 }
 
 
@@ -2704,32 +2704,32 @@ __kernel void sgemm_NN_1_96_16_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float co
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 
    int CurrentOffSetA = gidx*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -2741,7 +2741,7 @@ __kernel void sgemm_NN_1_96_16_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float co
         plB[48] = B[48*ldb];
         plB[64] = B[64*ldb];
         plB[80] = B[80*ldb];
-	   
+
 	      plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -2749,7 +2749,7 @@ __kernel void sgemm_NN_1_96_16_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float co
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -2784,9 +2784,9 @@ __kernel void sgemm_NN_1_96_16_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float co
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -2823,31 +2823,31 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
     int CurrentOffSetB = gidy*96+ idy;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -2859,7 +2859,7 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48*ldb];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64*ldb];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80*ldb];
-	   
+
 	    plA[0]  = A[0];
         plA[16] = A[16];
         plA[32] = A[32];
@@ -2867,7 +2867,7 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
         plA[64] = A[64];
         plA[80] = A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -2902,9 +2902,9 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -2918,9 +2918,9 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float
         C[64*ldc] = mad(alpha, rC[i][4], beta*C[64*ldc]);
 	  if(offset_y+80<N)
         C[80*ldc] = mad(alpha, rC[i][5], beta*C[80*ldc]);
-      
+
 	  C+=16;
-	    
+
 	}
     while (++i < 6);
 }
@@ -2941,32 +2941,32 @@ __kernel void sgemm_NN_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetA = gidx*96+ idx;
 	int CurrentOffSetB = gidy*96+ idy;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -2978,7 +2978,7 @@ __kernel void sgemm_NN_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48*ldb];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64*ldb];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -2986,7 +2986,7 @@ __kernel void sgemm_NN_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -3021,9 +3021,9 @@ __kernel void sgemm_NN_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -3037,13 +3037,13 @@ __kernel void sgemm_NN_1_1_16_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float 
         C[64*ldc] = mad(alpha, rC[i][4], beta*C[64*ldc]);
 	  if(offset_y+80<N)
         C[80*ldc] = mad(alpha, rC[i][5], beta*C[80*ldc]);
-      
+
 	  C+=16;
 	  offset_x+=16;
 	  if(offset_x>=M )
         return;
 
-	    
+
 	}
     while (++i < 6);
 }
@@ -3121,19 +3121,19 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
 
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
@@ -3141,10 +3141,10 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
 
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
    // for(unsigned int block_k=0 ; block_k< K ; block_k+=16)
 	//{
@@ -3157,7 +3157,7 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
         plB[48] = B[48*ldb];
         plB[64] = B[64*ldb];
         plB[80] = B[80*ldb];
-	   
+
 	    plA[0] = A[0+0*lda];
         plA[16] = A[16+0*lda];
         plA[32] = A[32+0*lda];
@@ -3165,7 +3165,7 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
         plA[64] = A[64+0*lda];
         plA[80] = A[80+0*lda];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -3199,7 +3199,7 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
     C+= gidx*96+idx;
     C+= gidy*96*ldc;
     C+= idy*ldc;
-    
+
 	C[0*ldc] = alpha*rC[0][0] ;
     C[16*ldc] = alpha*rC[0][1];
     C[32*ldc] = alpha*rC[0][2];
@@ -3241,7 +3241,7 @@ __kernel void sgemm_NN_96_96_16_16x16_6x6__ALPHA_SPLIT_MAIN( __global float cons
     C[48*ldc] = alpha*rC[5][3];
     C[64*ldc] = alpha*rC[5][4];
     C[80*ldc] = alpha*rC[5][5];
-   
+
 }
 
 
@@ -3260,44 +3260,44 @@ __kernel void sgemm_NN_1_96_16_16x16_6x6__ALPHA_SPLIT_ROW( __global float const 
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 
 	int CurrentOffSetA = gidx*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
         barrier(CLK_LOCAL_MEM_FENCE);
-		
+
         plB[0] = B[0];
         plB[16] = B[16*ldb];
         plB[32] = B[32*ldb];
         plB[48] = B[48*ldb];
         plB[64] = B[64*ldb];
         plB[80] = B[80*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -3305,7 +3305,7 @@ __kernel void sgemm_NN_1_96_16_16x16_6x6__ALPHA_SPLIT_ROW( __global float const 
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -3340,9 +3340,9 @@ __kernel void sgemm_NN_1_96_16_16x16_6x6__ALPHA_SPLIT_ROW( __global float const 
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0];
@@ -3378,31 +3378,31 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetB = gidy*96+ idy;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -3414,7 +3414,7 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48*ldb];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64*ldb];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80*ldb];
-	   
+
 	    plA[0]  = A[0];
         plA[16] = A[16];
         plA[32] = A[32];
@@ -3422,7 +3422,7 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
         plA[64] = A[64];
         plA[80] = A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -3457,9 +3457,9 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0] ;
@@ -3473,9 +3473,9 @@ __kernel void sgemm_NN_96_1_16_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float con
         C[64*ldc] = alpha * rC[i][4];
 	  if(offset_y+80<N)
         C[80*ldc] = alpha * rC[i][5];
-      
+
 	  C+=16;
-	    
+
 	}
     while (++i < 6);
 }
@@ -3495,44 +3495,44 @@ __kernel void sgemm_NN_1_1_16_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float cons
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetA = gidx*96+ idx;
 	int CurrentOffSetB = gidy*96+ idy;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
         barrier(CLK_LOCAL_MEM_FENCE);
-		
+
         plB[0]  = CurrentOffSetB>=N?0.0:B[0];
         plB[16] = CurrentOffSetB+16>=N?0.0:B[16*ldb];
         plB[32] = CurrentOffSetB+32>=N?0.0:B[32*ldb];
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48*ldb];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64*ldb];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -3540,7 +3540,7 @@ __kernel void sgemm_NN_1_1_16_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float cons
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -3575,29 +3575,29 @@ __kernel void sgemm_NN_1_1_16_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float cons
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0] ;
-	  if(offset_y+16<N)				   
+	  if(offset_y+16<N)
         C[16*ldc] = alpha * rC[i][1];
-      if(offset_y+32<N)		 	    
+      if(offset_y+32<N)
         C[32*ldc] = alpha * rC[i][2];
-      if(offset_y+48<N)		 	    
+      if(offset_y+48<N)
         C[48*ldc] = alpha * rC[i][3];
-	  if(offset_y+64<N)		 	    
+	  if(offset_y+64<N)
         C[64*ldc] = alpha * rC[i][4];
-	  if(offset_y+80<N)		    
+	  if(offset_y+80<N)
         C[80*ldc] = alpha * rC[i][5];
-      
+
 	  C+=16;
 	  offset_x+=16;
 	  if(offset_x>=M )
         return;
 
-	    
+
 	}
     while (++i < 6);
 }
@@ -3697,19 +3697,19 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
 
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
@@ -3717,10 +3717,10 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
 
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     int block_k = 0;//K >> 4
-    do 
+    do
 	{
    // for(unsigned int block_k=0 ; block_k< K ; block_k+=16)
 	//{
@@ -3733,7 +3733,7 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
         plB[48] = B[48*ldb];
         plB[64] = B[64*ldb];
         plB[80] = B[80*ldb];
-	   
+
 	    plA[0] = A[0+0*lda];
         plA[16] = A[16+0*lda];
         plA[32] = A[32+0*lda];
@@ -3741,7 +3741,7 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
         plA[64] = A[64+0*lda];
         plA[80] = A[80+0*lda];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -3750,56 +3750,56 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -3815,7 +3815,7 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
     C+= gidx*96+idx;
     C+= gidy*96*ldc;
     C+= idy*ldc;
-    
+
 	C[0*ldc] = alpha*rC[0][0] + beta*C[0*ldc];
     C[16*ldc] = alpha*rC[0][1] + beta*C[16*ldc];
     C[32*ldc] = alpha*rC[0][2] + beta*C[32*ldc];
@@ -3857,7 +3857,7 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHABETA_SPLIT_MAIN( __global float c
     C[48*ldc] = alpha*rC[5][3] + beta*C[48*ldc];
     C[64*ldc] = alpha*rC[5][4] + beta*C[64*ldc];
     C[80*ldc] = alpha*rC[5][5] + beta*C[80*ldc];
-   
+
 }
 
 
@@ -3877,32 +3877,32 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 
 	int CurrentOffSetA = gidx*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     int block_k = 0;//K >> 4
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -3913,7 +3913,7 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
         plB[48] = B[48*ldb];
         plB[64] = B[64*ldb];
         plB[80] = B[80*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -3921,7 +3921,7 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -3931,56 +3931,56 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -4000,9 +4000,9 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHABETA_SPLIT_ROW( __global float con
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -4039,31 +4039,31 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetB = gidy*96+ idy;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     int block_k = 0;//K >> 4
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -4074,7 +4074,7 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48*ldb];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64*ldb];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80*ldb];
-	   
+
 	    plA[0]  = A[0];
         plA[16] = A[16];
         plA[32] = A[32];
@@ -4082,7 +4082,7 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
         plA[64] = A[64];
         plA[80] = A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -4092,56 +4092,56 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -4161,9 +4161,9 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -4177,9 +4177,9 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHABETA_SPLIT_COLUMN( __global float 
         C[64*ldc] = mad(alpha, rC[i][4], beta*C[64*ldc]);
 	  if(offset_y+80<N)
         C[80*ldc] = mad(alpha, rC[i][5], beta*C[80*ldc]);
-      
+
 	  C+=16;
-	    
+
 	}
     while (++i < 6);
 }
@@ -4200,32 +4200,32 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetA = gidx*96+ idx;
 	int CurrentOffSetB = gidy*96+ idy;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     int block_k = 0;//K >> 4
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -4244,7 +4244,7 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
 	  // plB[64] = (CurrentOffSetB+64>=N || idx>=M)?0.0:B[64*ldb];
 	  // plB[80] = (CurrentOffSetB+80>=N || idx>=M)?0.0:B[80*ldb];
 
-	   
+
 	    plA[0]  = (CurrentOffSetA>=M )?0.0:A[0];
         plA[16] = (CurrentOffSetA+16>=M )?0.0:A[16];
         plA[32] = (CurrentOffSetA+32>=M )?0.0:A[32];
@@ -4252,7 +4252,7 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
         plA[64] = (CurrentOffSetA+64>=M )?0.0:A[64];
         plA[80] = (CurrentOffSetA+80>=M )?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -4261,56 +4261,56 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -4329,9 +4329,9 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -4345,13 +4345,13 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHABETA_SPLIT_SINGLE( __global float c
         C[64*ldc] = mad(alpha, rC[i][4], beta*C[64*ldc]);
 	  if(offset_y+80<N)
         C[80*ldc] = mad(alpha, rC[i][5], beta*C[80*ldc]);
-      
+
 	  C+=16;
 	  offset_x+=16;
 	  if(offset_x>=M )
         return;
 
-	    
+
 	}
     while (++i < 6);
 }
@@ -4429,19 +4429,19 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
 
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
@@ -4449,21 +4449,21 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
 
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;//K >> 4;
-    do 
+    do
     {
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
-      
+
         plB[0] = B[0];
         plB[16] = B[16*ldb];
         plB[32] = B[32*ldb];
         plB[48] = B[48*ldb];
         plB[64] = B[64*ldb];
         plB[80] = B[80*ldb];
-	   
+
 	      plA[0] = A[0+0*lda];
         plA[16] = A[16+0*lda];
         plA[32] = A[32+0*lda];
@@ -4471,7 +4471,7 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
         plA[64] = A[64+0*lda];
         plA[80] = A[80+0*lda];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -4480,56 +4480,56 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	      {
 
-	          rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	          rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
             barrier(CLK_LOCAL_MEM_FENCE);
         }
 
@@ -4543,7 +4543,7 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
     C+= gidx*96+idx;
     C+= gidy*96*ldc;
     C+= idy*ldc;
-    
+
 	C[0*ldc] = alpha*rC[0][0] ;
     C[16*ldc] = alpha*rC[0][1];
     C[32*ldc] = alpha*rC[0][2];
@@ -4585,7 +4585,7 @@ __kernel void sgemm_NN_96_96_1_16x16_6x6__ALPHA_SPLIT_MAIN( __global float const
     C[48*ldc] = alpha*rC[5][3];
     C[64*ldc] = alpha*rC[5][4];
     C[80*ldc] = alpha*rC[5][5];
-   
+
 }
 
 
@@ -4604,32 +4604,32 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 
 	int CurrentOffSetA = gidx*96+ idx;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;//K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -4640,7 +4640,7 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
         plB[48] = B[48*ldb];
         plB[64] = B[64*ldb];
         plB[80] = B[80*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -4648,7 +4648,7 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -4658,56 +4658,56 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -4728,9 +4728,9 @@ __kernel void sgemm_NN_1_96_1_16x16_6x6__ALPHA_SPLIT_ROW( __global float const *
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0];
@@ -4766,31 +4766,31 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetB = gidy*96+ idy;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;//K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -4801,7 +4801,7 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48*ldb];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64*ldb];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80*ldb];
-	   
+
 	      plA[0]  = A[0];
         plA[16] = A[16];
         plA[32] = A[32];
@@ -4809,7 +4809,7 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
         plA[64] = A[64];
         plA[80] = A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -4819,56 +4819,56 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	      {
 
-	          rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	          rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			      barrier(CLK_LOCAL_MEM_FENCE);
         }
 
@@ -4887,9 +4887,9 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
       return;
 
   C+=offset_x+offset_y*ldc;
-    
+
   int i = 0;
-  do 
+  do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0] ;
@@ -4903,9 +4903,9 @@ __kernel void sgemm_NN_96_1_1_16x16_6x6__ALPHA_SPLIT_COLUMN( __global float cons
       C[64*ldc] = alpha * rC[i][4];
 	  if(offset_y+80<N)
       C[80*ldc] = alpha * rC[i][5];
-      
+
 	  C+=16;
-	    
+
 	}
   while (++i < 6);
 }
@@ -4925,32 +4925,32 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
   uint offsetB,
   uint offsetC)
 {
-    float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
     float rA[1][6];
     float rB[1][6];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1552];
     __local float lB[1552];
-    
+
     uint gidx = M/96;//get_group_id(0);
     uint gidy = N/96;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetA = gidx*96+ idx;
 	int CurrentOffSetB = gidy*96+ idy;
-    
+
     A +=  gidx*96+ idx + idy*lda;
     B +=  gidy*96*ldb+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = 0;//K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*97+idx;
         __local float* plB = lB + idx*97+idy;
@@ -4961,7 +4961,7 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
         plB[48] = CurrentOffSetB+48>=N?0.0:B[48*ldb];
         plB[64] = CurrentOffSetB+64>=N?0.0:B[64*ldb];
         plB[80] = CurrentOffSetB+80>=N?0.0:B[80*ldb];
-	   
+
 	    plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -4969,7 +4969,7 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
         plA[64] = CurrentOffSetA+64>=M?0.0:A[64];
         plA[80] = CurrentOffSetA+80>=M?0.0:A[80];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -4979,56 +4979,56 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
         for(unsigned int k = 0 ; k < min(16u, K-block_k ); k+=1)
 	    {
 
-	        rA[0][0] = lA[offA + 0];				  
-            rA[0][1] = lA[offA + 16];				  
-            rA[0][2] = lA[offA + 32];				  
-            rA[0][3] = lA[offA + 48];				  
-            rA[0][4] = lA[offA + 64];				  
-            rA[0][5] = lA[offA + 80];				  
-            rB[0][0] = lB[offB + 0];				  
-            rB[0][1] = lB[offB + 16];				  
-            rB[0][2] = lB[offB + 32];				  
-            rB[0][3] = lB[offB + 48];				  
-            rB[0][4] = lB[offB + 64];				  
-            rB[0][5] = lB[offB + 80];				  
-            offA += 97;								  
-            offB += 97;								  
-            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]); 
-            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]); 
-            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]); 
-            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]); 
-            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]); 
-            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]); 
-            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]); 
-            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]); 
-            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]); 
-            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]); 
-            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]); 
-            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]); 
-            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]); 
-            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]); 
-            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]); 
-            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]); 
-            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]); 
-            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]); 
-            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); 
-            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); 
-            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); 
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); 
-            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]); 
-            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]); 
-            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]); 
-            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]); 
-            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]); 
-            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]); 
-            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]); 
-            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]); 
-            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]); 
-            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]); 
-            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]); 
-            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]); 
-            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]); 
-            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]); 
+	        rA[0][0] = lA[offA + 0];
+            rA[0][1] = lA[offA + 16];
+            rA[0][2] = lA[offA + 32];
+            rA[0][3] = lA[offA + 48];
+            rA[0][4] = lA[offA + 64];
+            rA[0][5] = lA[offA + 80];
+            rB[0][0] = lB[offB + 0];
+            rB[0][1] = lB[offB + 16];
+            rB[0][2] = lB[offB + 32];
+            rB[0][3] = lB[offB + 48];
+            rB[0][4] = lB[offB + 64];
+            rB[0][5] = lB[offB + 80];
+            offA += 97;
+            offB += 97;
+            rC[0][0]=mad(rA[0][0],rB[0][0],rC[0][0]);
+            rC[1][0]=mad(rA[0][1],rB[0][0],rC[1][0]);
+            rC[2][0]=mad(rA[0][2],rB[0][0],rC[2][0]);
+            rC[3][0]=mad(rA[0][3],rB[0][0],rC[3][0]);
+            rC[4][0]=mad(rA[0][4],rB[0][0],rC[4][0]);
+            rC[5][0]=mad(rA[0][5],rB[0][0],rC[5][0]);
+            rC[0][1]=mad(rA[0][0],rB[0][1],rC[0][1]);
+            rC[1][1]=mad(rA[0][1],rB[0][1],rC[1][1]);
+            rC[2][1]=mad(rA[0][2],rB[0][1],rC[2][1]);
+            rC[3][1]=mad(rA[0][3],rB[0][1],rC[3][1]);
+            rC[4][1]=mad(rA[0][4],rB[0][1],rC[4][1]);
+            rC[5][1]=mad(rA[0][5],rB[0][1],rC[5][1]);
+            rC[0][2]=mad(rA[0][0],rB[0][2],rC[0][2]);
+            rC[1][2]=mad(rA[0][1],rB[0][2],rC[1][2]);
+            rC[2][2]=mad(rA[0][2],rB[0][2],rC[2][2]);
+            rC[3][2]=mad(rA[0][3],rB[0][2],rC[3][2]);
+            rC[4][2]=mad(rA[0][4],rB[0][2],rC[4][2]);
+            rC[5][2]=mad(rA[0][5],rB[0][2],rC[5][2]);
+            rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]);
+            rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]);
+            rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]);
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]);
+            rC[4][3]=mad(rA[0][4],rB[0][3],rC[4][3]);
+            rC[5][3]=mad(rA[0][5],rB[0][3],rC[5][3]);
+            rC[0][4]=mad(rA[0][0],rB[0][4],rC[0][4]);
+            rC[1][4]=mad(rA[0][1],rB[0][4],rC[1][4]);
+            rC[2][4]=mad(rA[0][2],rB[0][4],rC[2][4]);
+            rC[3][4]=mad(rA[0][3],rB[0][4],rC[3][4]);
+            rC[4][4]=mad(rA[0][4],rB[0][4],rC[4][4]);
+            rC[5][4]=mad(rA[0][5],rB[0][4],rC[5][4]);
+            rC[0][5]=mad(rA[0][0],rB[0][5],rC[0][5]);
+            rC[1][5]=mad(rA[0][1],rB[0][5],rC[1][5]);
+            rC[2][5]=mad(rA[0][2],rB[0][5],rC[2][5]);
+            rC[3][5]=mad(rA[0][3],rB[0][5],rC[3][5]);
+            rC[4][5]=mad(rA[0][4],rB[0][5],rC[4][5]);
+            rC[5][5]=mad(rA[0][5],rB[0][5],rC[5][5]);
 			barrier(CLK_LOCAL_MEM_FENCE);
 
 
@@ -5049,29 +5049,29 @@ __kernel void sgemm_NN_1_1_1_16x16_6x6__ALPHA_SPLIT_SINGLE( __global float const
       return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	//for (int i=0; i<6; i++)
 	{
 	  C[0     ] = alpha * rC[i][0] ;
-	  if(offset_y+16<N)				   
+	  if(offset_y+16<N)
         C[16*ldc] = alpha * rC[i][1];
-      if(offset_y+32<N)		 	    
+      if(offset_y+32<N)
         C[32*ldc] = alpha * rC[i][2];
-      if(offset_y+48<N)		 	    
+      if(offset_y+48<N)
         C[48*ldc] = alpha * rC[i][3];
-	  if(offset_y+64<N)		 	    
+	  if(offset_y+64<N)
         C[64*ldc] = alpha * rC[i][4];
-	  if(offset_y+80<N)		    
+	  if(offset_y+80<N)
         C[80*ldc] = alpha * rC[i][5];
-      
+
 	  C+=16;
 	  offset_x+=16;
 	  if(offset_x>=M )
         return;
 
-	    
+
 	}
     while (++i < 6);
 }
@@ -5152,7 +5152,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   uint offsetB,
   uint offsetC)
 {
-  float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
   float rA[1][6];
   float rB[1][6];
 
@@ -5175,7 +5175,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
 
 
   uint block_k = K >> 4;
-  do 
+  do
   {
     __local float* plA = lA + idx*97+idy;
     __local float* plB = lB + idx*97+idy;
@@ -5286,7 +5286,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   uint offsetB,
   uint offsetC)
 {
-  float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
   float rA[1][6];
   float rB[1][6];
 
@@ -5311,7 +5311,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
 
 
   uint block_k = K >> 4;
-  do 
+  do
   {
     __local float* plA = lA + idx*97+idy;
     __local float* plB = lB + idx*97+idy;
@@ -5368,7 +5368,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   C+=offset_x+offset_y*ldc;
 
   int i = 0;
-  do 
+  do
   //for (int i=0; i<6; i++)
   {
     C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -5405,7 +5405,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   uint offsetB,
   uint offsetC)
 {
-  float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
   float rA[1][6];
   float rB[1][6];
 
@@ -5429,7 +5429,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
 
 
   uint block_k = K >> 4;
-  do 
+  do
   {
     __local float* plA = lA + idx*97+idy;
     __local float* plB = lB + idx*97+idy;
@@ -5486,7 +5486,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   C+=offset_x+offset_y*ldc;
 
   int i = 0;
-  do 
+  do
   //for (int i=0; i<6; i++)
   {
     C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -5523,7 +5523,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   uint offsetB,
   uint offsetC)
 {
-  float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
   float rA[1][6];
   float rB[1][6];
 
@@ -5548,7 +5548,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
 
 
   uint block_k = K >> 4;
-  do 
+  do
   {
     __local float* plA = lA + idx*97+idy;
     __local float* plB = lB + idx*97+idy;
@@ -5605,7 +5605,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   C+=offset_x+offset_y*ldc;
 
   int i = 0;
-  do 
+  do
   //for (int i=0; i<6; i++)
   {
     C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
@@ -5701,7 +5701,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   uint offsetB,
   uint offsetC)
 {
-  float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
   float rA[1][6];
   float rB[1][6];
 
@@ -5724,7 +5724,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
 
 
   uint block_k = K >> 4;
-  do 
+  do
   {
     __local float* plA = lA + idx*97+idy;
     __local float* plB = lB + idx*97+idy;
@@ -5834,7 +5834,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   uint offsetB,
   uint offsetC)
 {
-  float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
   float rA[1][6];
   float rB[1][6];
 
@@ -5859,7 +5859,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
 
 
   uint block_k = K >> 4;
-  do 
+  do
   {
     __local float* plA = lA + idx*97+idy;
     __local float* plB = lB + idx*97+idy;
@@ -5916,7 +5916,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   C+=offset_x+offset_y*ldc;
 
   int i = 0;
-  do 
+  do
   //for (int i=0; i<6; i++)
   {
     C[0     ] = mad(alpha, rC[i][0], 0);
@@ -5952,7 +5952,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   uint offsetB,
   uint offsetC)
 {
-  float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
   float rA[1][6];
   float rB[1][6];
 
@@ -5976,7 +5976,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
 
 
   uint block_k = K >> 4;
-  do 
+  do
   {
     __local float* plA = lA + idx*97+idy;
     __local float* plB = lB + idx*97+idy;
@@ -6033,7 +6033,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   C+=offset_x+offset_y*ldc;
 
   int i = 0;
-  do 
+  do
   //for (int i=0; i<6; i++)
   {
     C[0     ] = mad(alpha, rC[i][0], 0);
@@ -6069,7 +6069,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   uint offsetB,
   uint offsetC)
 {
-  float rC[6][6]  = {(float)0};
+    float rC[6][6]  = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
   float rA[1][6];
   float rB[1][6];
 
@@ -6094,7 +6094,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
 
 
   uint block_k = K >> 4;
-  do 
+  do
   {
     __local float* plA = lA + idx*97+idy;
     __local float* plB = lB + idx*97+idy;
@@ -6151,7 +6151,7 @@ __attribute__((reqd_work_group_size(16,16,1)))
   C+=offset_x+offset_y*ldc;
 
   int i = 0;
-  do 
+  do
   //for (int i=0; i<6; i++)
   {
     C[0     ] = mad(alpha, rC[i][0], 0);

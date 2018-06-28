@@ -30,7 +30,7 @@ static const char * sgemm_NT_64_32_SPLIT__ALPHABETA = "
             rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); \
             rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); \
             rC[2][3]=mad(rA[0][2],rB[0][3],rC[2][3]); \
-            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); \	
+            rC[3][3]=mad(rA[0][3],rB[0][3],rC[3][3]); \
 			mem_fence(CLK_LOCAL_MEM_FENCE);
 
 #define  M2x4 \
@@ -51,7 +51,7 @@ static const char * sgemm_NT_64_32_SPLIT__ALPHABETA = "
             rC[0][3]=mad(rA[0][0],rB[0][3],rC[0][3]); \
             rC[1][3]=mad(rA[0][1],rB[0][3],rC[1][3]); \
             mem_fence(CLK_LOCAL_MEM_FENCE);
-			
+
 #define  M4x2 \
             rA[0][0] = lA[offA + 0];				  \
             rA[0][1] = lA[offA + 16];				  \
@@ -101,19 +101,19 @@ __kernel void sgemm_NT_64_64_16_16x16_4x4__ALPHABETA_SPLIT_MAIN( __global float 
   uint offsetB,
   uint offsetC)
 {
-    float rC[4][4]  = {(float)0};
+    float rC[4][4]  = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
     float rA[1][4];
     float rB[1][4];
-    
 
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1040];
     __local float lB[1040];
-    
+
     uint gidx = get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
@@ -121,10 +121,10 @@ __kernel void sgemm_NT_64_64_16_16x16_4x4__ALPHABETA_SPLIT_MAIN( __global float 
 
     A +=  gidx*64+ idx + idy*lda;
     B +=  gidy*64+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
    // for(unsigned int block_k=0 ; block_k< K ; block_k+=16)
 	//{
@@ -135,13 +135,13 @@ __kernel void sgemm_NT_64_64_16_16x16_4x4__ALPHABETA_SPLIT_MAIN( __global float 
         plB[16] = B[16+0*ldb];
         plB[32] = B[32+0*ldb];
         plB[48] = B[48+0*ldb];
-	   
+
 	    plA[0] = A[0+0*lda];
         plA[16] = A[16+0*lda];
         plA[32] = A[32+0*lda];
         plA[48] = A[48+0*lda];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -175,7 +175,7 @@ __kernel void sgemm_NT_64_64_16_16x16_4x4__ALPHABETA_SPLIT_MAIN( __global float 
     C+= gidx*64+idx;
     C+= gidy*64*ldc;
     C+= idy*ldc;
-    
+
 	C[0*ldc] = alpha*rC[0][0] + beta*C[0*ldc];
     C[16*ldc] = alpha*rC[0][1] + beta*C[16*ldc];
     C[32*ldc] = alpha*rC[0][2] + beta*C[32*ldc];
@@ -195,9 +195,9 @@ __kernel void sgemm_NT_64_64_16_16x16_4x4__ALPHABETA_SPLIT_MAIN( __global float 
     C[16*ldc] = alpha*rC[3][1] + beta*C[16*ldc];
     C[32*ldc] = alpha*rC[3][2] + beta*C[32*ldc];
     C[48*ldc] = alpha*rC[3][3] + beta*C[48*ldc];
-   
+
 }
-			
+
 __attribute__((reqd_work_group_size(16,16,1)))
 __kernel void sgemm_NT_32_64_16_16x16_2x4__ALPHABETA_SPLIT_ROW( __global float const * restrict A,
   __global float const * restrict B,
@@ -214,32 +214,32 @@ __kernel void sgemm_NT_32_64_16_16x16_2x4__ALPHABETA_SPLIT_ROW( __global float c
   uint offsetB,
   uint offsetC)
 {
-    float rC[2][4]  = {(float)0};
+    float rC[4][4]  = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
     float rA[1][2];
     float rB[1][4];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[528];//16*32+16
     __local float lB[1040];//16*64+16
-    
+
     uint gidx = M/64;//get_group_id(0);
     uint gidy = get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 
 	int CurrentOffSetA = gidx*64+ idx;
-    
+
     A +=  gidx*64+ idx + idy*lda;
     B +=  gidy*64+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*33+idx;
         __local float* plB = lB + idy*65+idx;
@@ -249,7 +249,7 @@ __kernel void sgemm_NT_32_64_16_16x16_2x4__ALPHABETA_SPLIT_ROW( __global float c
         plB[16] = B[16+0*ldb];
         plB[32] = B[32+0*ldb];
         plB[48] = B[48+0*ldb];
-	   
+
 	    //plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         //plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         //plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
@@ -257,7 +257,7 @@ __kernel void sgemm_NT_32_64_16_16x16_2x4__ALPHABETA_SPLIT_ROW( __global float c
 		plA[0] = A[0];
 		plA[16] = A[16];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -292,9 +292,9 @@ __kernel void sgemm_NT_32_64_16_16x16_2x4__ALPHABETA_SPLIT_ROW( __global float c
     //  return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
       C[16*ldc] = mad(alpha, rC[i][1], beta*C[16*ldc]);
@@ -324,31 +324,31 @@ __kernel void sgemm_NT_64_32_16_16x16_4x2__ALPHABETA_SPLIT_COLUMN( __global floa
   uint offsetB,
   uint offsetC)
 {
-    float rC[4][2]  = {(float)0};
+    float rC[4][4]  = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
     float rA[1][4];
     float rB[1][2];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[1040];//16*64+16
     __local float lB[528];//16*32+16
-    
+
     uint gidx = get_group_id(0);
     uint gidy = N/64;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetB = gidy*64+ idx;
-    
+
     A +=  gidx*64+ idx + idy*lda;
     B +=  gidy*64+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*65+idx;
         __local float* plB = lB + idy*33+idx;
@@ -360,13 +360,13 @@ __kernel void sgemm_NT_64_32_16_16x16_4x2__ALPHABETA_SPLIT_COLUMN( __global floa
         //plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
 		plB[0]  = B[0];
         plB[16] = B[16];
-	   
+
 	    plA[0]  = A[0];
         plA[16] = A[16];
         plA[32] = A[32];
         plA[48] = A[48];
 
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -401,15 +401,15 @@ __kernel void sgemm_NT_64_32_16_16x16_4x2__ALPHABETA_SPLIT_COLUMN( __global floa
     // return;
 
   C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-  do 
+  do
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
       C[16*ldc] = mad(alpha, rC[i][1], beta*C[16*ldc]);
-      
+
 	  C+=16;
-	    
+
 	}
     while (++i < 4);
 }
@@ -430,32 +430,32 @@ __kernel void sgemm_NT_32_32_16_16x16_2x2__ALPHABETA_SPLIT_SINGLE( __global floa
   uint offsetB,
   uint offsetC)
 {
-    float rC[2][2]  = {(float)0};
+    float rC[4][4]  = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
     float rA[1][2];
     float rB[1][2];
-    
-    
+
+
     A += offsetA;
     B += offsetB;
     C+=offsetC;
-    
+
     __local float lA[528];
     __local float lB[528];
-    
+
     uint gidx = M/64;//get_group_id(0);
     uint gidy = N/64;//get_group_id(1);
     uint idx = get_local_id(0);
     uint idy = get_local_id(1);
-    
+
 	int CurrentOffSetA = gidx*64+ idx;
 	int CurrentOffSetB = gidy*64+ idx;
-    
+
     A +=  gidx*64+ idx + idy*lda;
     B +=  gidy*64+ idx + idy*ldb;
-    
-   
+
+
     uint block_k = K >> 4;
-    do 
+    do
 	{
         __local float* plA = lA + idy*33+idx;
         __local float* plB = lB + idy*33+idx;
@@ -467,14 +467,14 @@ __kernel void sgemm_NT_32_32_16_16x16_2x2__ALPHABETA_SPLIT_SINGLE( __global floa
         //plB[48] = CurrentOffSetB+48>=N?0.0:B[48];
 		plB[0]  = B[0];
         plB[16] = B[16];
-	   
+
 	    //plA[0]  = CurrentOffSetA>=M?0.0:A[0];
         //plA[16] = CurrentOffSetA+16>=M?0.0:A[16];
         //plA[32] = CurrentOffSetA+32>=M?0.0:A[32];
         //plA[48] = CurrentOffSetA+48>=M?0.0:A[48];
 	    plA[0]  = A[0];
         plA[16] = A[16];
-        
+
         barrier(CLK_LOCAL_MEM_FENCE);
         uint offA = idx;
         uint offB = idy;
@@ -509,20 +509,20 @@ __kernel void sgemm_NT_32_32_16_16x16_2x2__ALPHABETA_SPLIT_SINGLE( __global floa
     //  return;
 
     C+=offset_x+offset_y*ldc;
-    
+
 	int i = 0;
-    do 
+    do
 	{
 	  C[0     ] = mad(alpha, rC[i][0], beta*C[0]);
       C[16*ldc] = mad(alpha, rC[i][1], beta*C[16*ldc]);
 
-      
+
 	  C+=16;
 	  offset_x+=16;
 	  //if(offset_x>=M )
       //  return;
 
-	    
+
 	}
     while (++i < 2);
 }

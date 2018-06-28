@@ -160,6 +160,7 @@ void makeGemmKernel(
         clProgram,
         1, &clDevice,
         sourceBuildOptions, NULL, NULL );
+//printf("%s:%d: kernel source = %s\n", __FUNCTION__, __LINE__, kernelSource);
       CL_CHECK(err)
     }
 
@@ -187,7 +188,7 @@ void makeGemmKernel(
     CL_CHECK(err)
 	err = clReleaseProgram(clProgram);
 	CL_CHECK(err)
-    
+
 #ifdef AUTOGEMM_PRINT_DEBUG
     // get kernel name
     size_t kernelNameLength;
@@ -212,7 +213,7 @@ void makeGemmKernel(
   }
 }
 
- 
+
 /******************************************************************************
  * Enqueue Gemm Kernel
  *****************************************************************************/
@@ -266,7 +267,7 @@ template<> clblasTranspose correctTranspose<DoubleComplex>( clblasTranspose tran
  * templated Gemm
  *****************************************************************************/
 template<typename Precision>
-clblasStatus 
+clblasStatus
 clblasGemm(
     clblasOrder order,
     clblasTranspose transA,
@@ -308,7 +309,7 @@ clblasGemm(
     M, N, offA, offB, lda, ldb, A, B );
 
 
-  
+
 /******************************************************************************
  * Handle Special Cases
  *
@@ -318,7 +319,7 @@ clblasGemm(
  * and are mod32 but not mod96 or mod64
  *
  *****************************************************************************/
-  
+
   bool specialCaseHandled = false;
 
   clblasStatus SpecialCaseStatus = GemmSpecialCases<Precision>(order,
@@ -339,8 +340,8 @@ clblasGemm(
 
   if (specialCaseHandled)
 	  return SpecialCaseStatus;
-  
-  
+
+
 /******************************************************************************
  * Optimal num elements per thread
  *****************************************************************************/
@@ -512,7 +513,7 @@ clblasGemm(
   gemmKernelArgs[11] = &offA;  gemmKernelArgSizes[11] = sizeof(cl_uint);
   gemmKernelArgs[12] = &offB;  gemmKernelArgSizes[12] = sizeof(cl_uint);
   gemmKernelArgs[13] = &offC;  gemmKernelArgSizes[13] = sizeof(cl_uint);
-  
+
 
 /******************************************************************************
  * Enqueue Tile kernel
@@ -577,8 +578,8 @@ clblasGemm(
 /******************************************************************************
  * SGEMM API call
  *****************************************************************************/
-extern "C" 
-clblasStatus 
+extern "C"
+clblasStatus
 clblasSgemm(
     clblasOrder order,
     clblasTranspose transA,
@@ -615,7 +616,7 @@ clblasSgemm(
 /******************************************************************************
  * DGEMM API call
  *****************************************************************************/
-extern "C" 
+extern "C"
 clblasStatus
 clblasDgemm( clblasOrder order,
              clblasTranspose transA,
@@ -652,7 +653,7 @@ clblasDgemm( clblasOrder order,
 /******************************************************************************
  * CGEMM API call
  *****************************************************************************/
-extern "C" 
+extern "C"
 clblasStatus
 clblasCgemm(
     clblasOrder order,
@@ -690,7 +691,7 @@ clblasCgemm(
 /******************************************************************************
  * ZGEMM API
  *****************************************************************************/
-extern "C" 
+extern "C"
 clblasStatus
 clblasZgemm(
     clblasOrder order,
